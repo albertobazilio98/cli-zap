@@ -1,0 +1,16 @@
+GEM
+  specs:
+    byebug (11.0.1)
+    choice (0.2.0)
+    multicast (0.2.2)
+      choice (>= 0.1.4)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  byebug
+  multicast
+
+BUNDLED WITH
+   2.1.4
