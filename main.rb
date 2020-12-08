@@ -8,6 +8,7 @@ class MulticastClient
     @sender = Multicast::Sender.new(group: adress, port: port)
     @name = name
     @leader = false
+    @election = false
     @messages = []
     @unseen_by_leader = []
     @joined_at = Time.now.to_f
@@ -15,9 +16,8 @@ class MulticastClient
 
     Thread.new do
       @listener.listen do |message|
-        puts "#{message.message}"
-        puts is_system_message?(message)
-        # byebug
+        puts "#{message.message}" if !is_system_message?(message)
+        # puts is_system_message?(message)
         send_leader_response if @leader && !is_system_message?(message)
         add_message_to_box(message)
       end
@@ -26,9 +26,8 @@ class MulticastClient
       loop do
         sleep(1)
         next if @unseen_by_leader.size.zero?
-        # byebug
         next if (Time.now.to_f - @unseen_by_leader.first[:time]) < 5
-        start_election
+        start_election unless @election
       end
     end
     join_session
@@ -80,6 +79,7 @@ class MulticastClient
   end
 
   def start_election
+    @election = true
     @unseen_by_leader = []
     puts 'inicia sabagaça'
     @sender.send("election: #{@joined_at}")
@@ -89,6 +89,17 @@ class MulticastClient
         @joined_at >= join_time
       end
       @join_times = []
+      @unseen_by_leader = []
+      @election = false
     end
   end
+end
+
+a = MulticastClient.new('224.0.1.33', 3000, 'alberto')
+
+loop do
+  user_input = gets.chomp
+  $stdout.flush
+  puts '\bbatata'
+  a.send_message user_input
 end
