@@ -1,6 +1,5 @@
 require 'socket'
 require 'multicast'
-require 'byebug'
 
 class MulticastClient
   def initialize(adress, port, name)
