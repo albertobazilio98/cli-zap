@@ -123,7 +123,7 @@ class MulticastClient
     @udp_socket.bind(@ip, 4242)
     Thread.new do
       loop do
-        external_message = @udp_socket.recvfrom(10)
+        external_message = @udp_socket.recvfrom(128)
         @sender.send("[#{external_message[1][2]}]: #{external_message[0]}")
       end
     end
