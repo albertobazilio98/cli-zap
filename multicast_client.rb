@@ -106,6 +106,27 @@ class MulticastClient
       @join_times = []
       @unseen_by_leader = []
       @election = false
+      if @leader
+        @sender.send("new_leader: #{@name}")
+        start_leadership
+      end
+    end
+  end
+
+  def start_leadership
+    open_udp_socket
+    send_message("udp socket oppened in #{@ip}:4242")
+  end
+
+  def open_udp_socket
+    @udp_socket = UDPSocket.new
+    @ip = Socket.ip_address_list.detect{ |intf| intf.ipv4_private? }.ip_address
+    @udp_socket.bind(@ip, 4242)
+    Thread.new do
+      loop do
+        external_message = @udp_socket.recvfrom(10)
+        @sender.send("[#{external_message[1][2]}]: #{external_message[0]}")
+      end
     end
   end
 end
