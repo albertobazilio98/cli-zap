@@ -17,7 +17,6 @@ class MulticastClient
     Thread.new do
       @listener.listen do |message|
         clear_screen
-        # puts "#{message.message}" if !is_system_message?(message)
         send_leader_response if @leader && !is_system_message?(message)
         add_message_to_box(message)
         print_messages get_last_messages(10)
@@ -52,7 +51,6 @@ class MulticastClient
 
   def get_last_messages quantity
     n = @user_messages.size <= quantity ? @user_messages.size : quantity
-    # puts @user_messages[-(n-1)..-1]
     @user_messages[-n..-1]
   end
 
