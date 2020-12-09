@@ -13,13 +13,15 @@ class MulticastClient
     @unseen_by_leader = []
     @joined_at = Time.now.to_f
     @join_times = []
+    @user_messages = []
 
     Thread.new do
       @listener.listen do |message|
-        puts "#{message.message}" if !is_system_message?(message)
-        # puts is_system_message?(message)
+        clear_screen
+        # puts "#{message.message}" if !is_system_message?(message)
         send_leader_response if @leader && !is_system_message?(message)
         add_message_to_box(message)
+        print_messages get_last_messages(10)
       end
     end
     Thread.new do
@@ -49,11 +51,24 @@ class MulticastClient
     @listener
   end
 
+  def get_last_messages quantity
+    n = @user_messages.size <= quantity ? @user_messages.size : quantity
+    # puts @user_messages[-(n-1)..-1]
+    @user_messages[-n..-1]
+  end
+
+  def print_messages messages
+    puts messages.join("\n")
+  end
+
   private
 
   def add_message_to_box message
     @messages << message
-    @unseen_by_leader << { message: message, time: Time.now.to_f } if not is_system_message?(message)
+    unless is_system_message?(message)
+      @user_messages << message.message
+      @unseen_by_leader << { message: message, time: Time.now.to_f }
+    end
     @unseen_by_leader.shift if is_leader_response?(message)
     @join_times << message.message[10..-1].to_f if is_election_message?(message)
   end
@@ -95,11 +110,7 @@ class MulticastClient
   end
 end
 
-a = MulticastClient.new('224.0.1.33', 3000, 'alberto')
 
-loop do
-  user_input = gets.chomp
-  $stdout.flush
-  puts '\bbatata'
-  a.send_message user_input
+def clear_screen
+  Gem.win_platform? ? (system "cls") : (system "clear")
 end
